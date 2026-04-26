@@ -43,6 +43,22 @@ public:
 	void EndWave();
 	void UpdateTimeRemaining();
 
+
+	// 현재 점수를 읽는 함수
+	UFUNCTION(BlueprintPure, Category = "Score")
+	int32 Get_Score() const;
+	// 점수를 추가해주는 함수
+	UFUNCTION(BlueprintCallable, Category = "Score")
+	void Add_Score(int32 Amount);
+
+
 	UFUNCTION(BlueprintCallable, Category = "Level")
 	void OnGameOver(bool bIsCleared);
+
+
+	//점수 아이템을 다 먹으면 넘어갈 수 있게 적용 생각중
+	//Wave에서 생성된 코인 변수
+	//드론(캐릭터)이 먹은 코인 변수
+
+	//스포너에서 SpawnWave 반환형 바꾸는거 고민중
 };

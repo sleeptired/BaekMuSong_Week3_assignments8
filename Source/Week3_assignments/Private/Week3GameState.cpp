@@ -12,7 +12,8 @@ AWeek3GameState::AWeek3GameState()
 	Score = 0;
 	CurrentWave = 1;
 	MaxWaves = 3; // 3웨이브
-	WaveDuration = 30.0f; // 30초
+	WaveDuration = 60.0f; // 30초
+	WaveTimeRemaining = 0;
 }
 
 void AWeek3GameState::BeginPlay()
@@ -28,6 +29,14 @@ void AWeek3GameState::BeginPlay()
 
 void AWeek3GameState::StartWave()
 {
+	WaveDuration = WaveDuration - (CurrentWave - 1) * 15.0f;
+
+	// 혹시 모를 추가 웨이브를 위해 최소 시간(예: 15초) 아래로는 안 내려가게 방어 코드를 넣으면 좋습니다.
+	if (WaveDuration < 15.0f)
+	{
+		WaveDuration = 15.0f;
+	}
+
 	WaveTimeRemaining = (int32)WaveDuration;
 
 	// 스포너에게 스폰 명령 (웨이브 증가에 따른 개수 증가는 스포너가 알아서 처리함)
@@ -37,12 +46,14 @@ void AWeek3GameState::StartWave()
 	{
 		if (AWeek3PuzzleSpawner* Spawner = Cast<AWeek3PuzzleSpawner>(FoundSpawners[0]))
 		{
-			//Spawner->SpawnWave(CurrentWave);
+			Spawner->SpawnWave(CurrentWave);
 		}
 	}
 
 	GetWorldTimerManager().SetTimer(WaveTimerHandle, this, &AWeek3GameState::OnWaveTimeUp, WaveDuration, false);
 	GetWorldTimerManager().SetTimer(UICountdownTimerHandle, this, &AWeek3GameState::UpdateTimeRemaining, 1.0f, true);
+
+	UE_LOG(LogTemp, Warning, TEXT("Wave %d 시작!"), CurrentWave);
 }
 
 void AWeek3GameState::OnWaveTimeUp()
@@ -62,7 +73,7 @@ void AWeek3GameState::EndWave()
 	{
 		if (AWeek3PuzzleSpawner* Spawner = Cast<AWeek3PuzzleSpawner>(FoundSpawners[0]))
 		{
-			//Spawner->ClearWave();
+			Spawner->ClearWave_Obejct();
 		}
 	}
 
@@ -80,11 +91,14 @@ void AWeek3GameState::EndWave()
 
 void AWeek3GameState::UpdateTimeRemaining()
 {
+	//UI강의 로직보기
+
 	WaveTimeRemaining--;
 }
 
 void AWeek3GameState::OnGameOver(bool bIsCleared)
 {
+	//GameInstance확인
 	if (bIsCleared)
 	{
 		if (UWeek3GameInstance* GI = Cast<UWeek3GameInstance>(GetGameInstance()))
@@ -115,4 +129,23 @@ void AWeek3GameState::OnGameOver(bool bIsCleared)
 			//PC->ShowGameOver();
 		}
 	}
+}
+
+void AWeek3GameState::Add_Score(int32 Amount)
+{
+	if (UGameInstance* GameInsatance = GetGameInstance())
+	{
+		UWeek3GameInstance* Week3GameInstance = Cast<UWeek3GameInstance>(GameInsatance);
+		if (Week3GameInstance)
+		{
+			Week3GameInstance->AddToScore(Amount);
+		}
+	}
+	//Score += Amount;
+	//UE_LOG(LogTemp, Warning, TEXT("Scroe: %d"), Score);
+}
+
+int32 AWeek3GameState::Get_Score() const
+{
+	return Score;
 }

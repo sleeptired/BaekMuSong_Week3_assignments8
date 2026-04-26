@@ -4,9 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "SpawnObjectRow.h"
 #include "Week3PuzzleSpawner.generated.h"
 
 class UBoxComponent;
+class UDataTable;
 UCLASS()
 class WEEK3_ASSIGNMENTS_API AWeek3PuzzleSpawner : public AActor
 {
@@ -16,7 +18,9 @@ public:
 	// Sets default values for this actor's properties
 	AWeek3PuzzleSpawner();
 
-	virtual void Tick(float DeltaTime) override;
+	void SpawnWave(int32 WaveIndex);
+
+	void ClearWave_Obejct();
 
 protected:
 	// Called when the game starts or when spawned
@@ -26,18 +30,26 @@ protected:
 	class UBoxComponent* SpawnArea;
 
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawner|Settings")
-	TArray<TSubclassOf<AActor>> PlatformClassesToSpawn;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
+	TArray<UDataTable*> WaveDataTables;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawner|Settings")
-	int32 SpawnCount;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
+	int32 ObjectCount;
 
 
 private:
-	// 1. 랜덤 스폰 위치를 계산해서 반환하는 함수
+	UPROPERTY()
+	TArray<AActor*> SpawnedItems;
+
+	// 랜덤 스폰 위치를 계산해서 반환하는 함수
 	FVector GetRandomSpawnLocation() const;
 
-	// 2. 스폰된 액터의 종류를 파악하고 랜덤 속성을 쏴주는 함수
+	// 스폰된 액터의 종류를 파악하고 랜덤 속성을 쏴주는 함수
 	void ApplyRandomSettings(AActor* SpawnedActor);
+
+	// 특정 데이터 테이블에서 확률에 맞춰 아이템을 뽑아오는 함수
+	FSpawnObjectRow* GetRandomItemFromTable(UDataTable* DataTable) const;
+
+
 
 };

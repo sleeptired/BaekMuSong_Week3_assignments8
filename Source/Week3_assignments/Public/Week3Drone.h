@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -21,6 +21,14 @@ class WEEK3_ASSIGNMENTS_API AWeek3Drone : public APawn
 public:
 	// Sets default values for this pawn's properties
 	AWeek3Drone();
+
+
+	// 현재 체력을 가져오는 함수
+	UFUNCTION(BlueprintPure, Category = "HP")
+	float GetHealth() const;
+	// 체력을 회복시키는 함수
+	UFUNCTION(BlueprintCallable, Category = "HP")
+	void AddHealth(float Amount);
 
 protected:
 	// Called when the game starts or when spawned
@@ -80,7 +88,7 @@ protected:
 	void UpdateMovement(float DeltaTime);
 
 	//UFUNCTION()
-	//void UpdateBanking(float DeltaTime); ���߿� �߰�����
+	//void UpdateBanking(float DeltaTime); 나중에 추가예정
 
 	UPROPERTY(EditAnywhere, Category = "DroneSettings")
 	float Gravity; 
@@ -93,6 +101,21 @@ protected:
 	float UpSpeed;
 
 	FRotator BaseMeshRotation;
+
+	//체력
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HP")
+	float MaxHealth;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "HP")
+	float CurrentHealth;
+
+	// 사망 처리 함수 (체력이 0 이하가 되었을 때 호출)
+	//UFUNCTION(BlueprintCallable, Category = "Health")
+	//virtual void OnDeath();
+
+	// 데미지 처리 함수 - 외부로부터 데미지를 받을 때 호출됨
+    // 또는 AActor의 TakeDamage()를 오버라이드
+	//virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 public:	
 	// Called every frame

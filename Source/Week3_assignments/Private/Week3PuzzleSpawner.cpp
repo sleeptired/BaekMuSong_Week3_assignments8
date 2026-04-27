@@ -4,7 +4,7 @@
 #include "Week3PuzzleSpawner.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "Week3MovePlatform.h" 
+#include "Week3MovePlatform.h" //장애물 변경
 #include "Week3Gear.h"
 #include "SpawnObjectRow.h"
 
@@ -45,6 +45,7 @@ FVector AWeek3PuzzleSpawner::GetRandomSpawnLocation() const
 
 void AWeek3PuzzleSpawner::ApplyRandomSettings(AActor* SpawnedActor)
 {
+	//장애물 변경
 	if (AWeek3MovePlatform* MovingPlatform = Cast<AWeek3MovePlatform>(SpawnedActor))
 	{
 		FMovePlatformSettings RandomSettings;

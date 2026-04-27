@@ -110,12 +110,23 @@ protected:
 	float CurrentHealth;
 
 	// 사망 처리 함수 (체력이 0 이하가 되었을 때 호출)
-	//UFUNCTION(BlueprintCallable, Category = "Health")
-	//virtual void OnDeath();
+	UFUNCTION(BlueprintCallable, Category = "HP")
+	void OnDeath();
 
 	// 데미지 처리 함수 - 외부로부터 데미지를 받을 때 호출됨
     // 또는 AActor의 TakeDamage()를 오버라이드
-	//virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+
+
+	// 무적 상태인지 확인하는 변수
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Health")
+	bool bIsInvincible;
+
+	// 무적 시간 타이머
+	FTimerHandle InvincibilityTimerHandle;
+
+	// 무적 상태를 풀어주는 함수
+	void DisableInvincibility();
 
 public:	
 	// Called every frame

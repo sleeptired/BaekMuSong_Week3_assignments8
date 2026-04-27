@@ -59,6 +59,8 @@ AWeek3Drone::AWeek3Drone()
 	MaxHealth = 100.0f;
 	CurrentHealth = MaxHealth;
 
+	//무적판정
+	bIsInvincible = false;
 }
 
 float AWeek3Drone::GetHealth() const
@@ -78,6 +80,44 @@ void AWeek3Drone::BeginPlay()
 	Super::BeginPlay();
 }
 
+
+void AWeek3Drone::OnDeath()
+{
+
+}
+
+float AWeek3Drone::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+
+	if (bIsInvincible)
+	{
+		return 0.0f;
+	}
+
+	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser); //실제 데미지를 들고온다.
+
+	CurrentHealth = FMath::Clamp(CurrentHealth - DamageAmount, 0.0f, MaxHealth);
+
+	UE_LOG(LogTemp, Warning, TEXT("Health Decreased to: %f"), CurrentHealth);
+
+	if (CurrentHealth <= 0.0f)
+	{
+		OnDeath();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("무적 시간 시작"));
+		bIsInvincible = true;
+		GetWorld()->GetTimerManager().SetTimer(InvincibilityTimerHandle, this, &AWeek3Drone::DisableInvincibility, 2.0f, false);
+	}
+	return 0.0f;
+}
+
+void AWeek3Drone::DisableInvincibility()
+{
+	bIsInvincible = false;
+	UE_LOG(LogTemp, Log, TEXT("무적 시간 끝"));
+}
 
 // Called every frame
 void AWeek3Drone::Tick(float DeltaTime)

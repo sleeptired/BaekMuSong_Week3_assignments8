@@ -40,7 +40,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Platform|Components")
 	UStaticMeshComponent* StaticMeshComp;
 
-	// 💡 구조체 변수 단 하나로 통일!
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Platform|Movement")
 	FMovePlatformSettings Settings;
 

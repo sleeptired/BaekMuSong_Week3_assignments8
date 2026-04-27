@@ -3,11 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "Week3TrapBase.h"
 #include "Week3Gear.generated.h"
 
+class UBoxComponent;
+
 UCLASS()
-class WEEK3_ASSIGNMENTS_API AWeek3Gear : public AActor
+class WEEK3_ASSIGNMENTS_API AWeek3Gear : public AWeek3TrapBase
 {
 	GENERATED_BODY()
 	
@@ -16,12 +18,9 @@ public:
 	AWeek3Gear();
 
 protected:
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Gear|Components")
-	USceneComponent* SceneRoot;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gear|Components")
-	UStaticMeshComponent* StaticMeshComp;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Trap|Component")
+	UBoxComponent* CollisionBox;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gear|Movement")
 	FRotator RotationSpeed;

@@ -23,7 +23,6 @@ AWeek3MovingSpike::AWeek3MovingSpike()
 	Collision->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
 	Collision->SetupAttachment(SceneRoot);
 
-	TrapDamage = 20.0f;
 }
 
 void AWeek3MovingSpike::Tick(float DeltaTime)

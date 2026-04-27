@@ -6,13 +6,15 @@
 #include "Week3PuzzleSpawner.h"
 #include "Week3DroneController.h"
 #include "Kismet/GameplayStatics.h"
+#include "Components/TextBlock.h"
+#include "Blueprint/UserWidget.h"
 
 AWeek3GameState::AWeek3GameState()
 {
 	Score = 0;
 	CurrentWave = 1;
 	MaxWaves = 3; // 3웨이브
-	WaveDuration = 60.0f; // 30초
+	WaveDuration = 10.0f; 
 	WaveTimeRemaining = 0;
 }
 
@@ -20,6 +22,15 @@ void AWeek3GameState::BeginPlay()
 {
 	Super::BeginPlay();
 
+	//UI 테스트용
+	GetWorldTimerManager().SetTimer(
+		HUDUpdateTimerHandle,
+		this,
+		&AWeek3GameState::UpdateHUD,
+		0.1f,
+		true
+	);
+	//이거 활용해서 메인 메뉴로 가게 하는거 생각하기
 	FString CurrentMapName = GetWorld()->GetMapName();
 	if (!CurrentMapName.Contains("MenuLevel"))
 	{
@@ -29,13 +40,22 @@ void AWeek3GameState::BeginPlay()
 
 void AWeek3GameState::StartWave()
 {
-	WaveDuration = WaveDuration - (CurrentWave - 1) * 15.0f;
-
-	// 혹시 모를 추가 웨이브를 위해 최소 시간(예: 15초) 아래로는 안 내려가게 방어 코드를 넣으면 좋습니다.
-	if (WaveDuration < 15.0f)
+	//게임 시작했으니 메뉴 UI 삭제
+	if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
 	{
-		WaveDuration = 15.0f;
+		if (AWeek3DroneController* Week3DroneController = Cast<AWeek3DroneController>(PlayerController))
+		{
+			Week3DroneController->ShowGameHUD();
+		}
 	}
+	//테스트용이라서 나중에 주석풀기
+	//float BaseDuration = 60.0f;
+	//WaveDuration = BaseDuration - (CurrentWave - 1) * 15.0f;
+	//
+	//if (WaveDuration < 15.0f)
+	//{
+	//	WaveDuration = 15.0f;
+	//}
 
 	WaveTimeRemaining = (int32)WaveDuration;
 
@@ -92,12 +112,13 @@ void AWeek3GameState::EndWave()
 void AWeek3GameState::UpdateTimeRemaining()
 {
 	//UI강의 로직보기
-
 	WaveTimeRemaining--;
 }
 
 void AWeek3GameState::OnGameOver(bool bIsCleared)
 {
+	//여기 로직 수정하기
+	
 	//GameInstance확인
 	if (bIsCleared)
 	{
@@ -110,7 +131,15 @@ void AWeek3GameState::OnGameOver(bool bIsCleared)
 			{
 				if (AWeek3DroneController* PC = Cast<AWeek3DroneController>(GetWorld()->GetFirstPlayerController()))
 				{
-					//PC->ShowGameOver(); // 승리 화면용 게임오버 창 띄우기
+					//일단 테스트용(게임 종료부분)
+					if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+					{
+						if (AWeek3DroneController* Week3DroneController = Cast<AWeek3DroneController>(PlayerController))
+						{
+							Week3DroneController->ShowMainMenu(true);
+						}
+					}
+					//
 				}
 			}
 			else
@@ -126,7 +155,63 @@ void AWeek3GameState::OnGameOver(bool bIsCleared)
 		// 사망 시: 메뉴 UI 띄우기
 		if (AWeek3DroneController* PC = Cast<AWeek3DroneController>(GetWorld()->GetFirstPlayerController()))
 		{
-			//PC->ShowGameOver();
+			//일단 테스트용(게임 종료부분)
+			if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+			{
+				if (AWeek3DroneController* Week3DroneController = Cast<AWeek3DroneController>(PlayerController))
+				{
+					Week3DroneController->ShowMainMenu(true);
+				}
+			}
+			//
+		}
+	}
+}
+
+void AWeek3GameState::UpdateHUD()
+{
+	if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+	{
+		if(AWeek3DroneController* Week3DroneController = Cast<AWeek3DroneController>(PlayerController))
+		{
+			if (UUserWidget* HUDWidget = Week3DroneController->GetHUDWidget())
+			{
+				//Wave다 시간
+				if (UTextBlock* TimeText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("Time"))))
+				{
+					float RemainingTime = GetWorldTimerManager().GetTimerRemaining(WaveTimerHandle);
+					TimeText->SetText(FText::FromString(FString::Printf(TEXT("Time: %.1f"), RemainingTime)));
+				}
+				//Score 누적 (레벨넘어가도)
+				if (UTextBlock* ScoreText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("Score"))))
+				{
+					if (UGameInstance* GameInstance = GetGameInstance())
+					{
+						UWeek3GameInstance* Week3GameInstance = Cast<UWeek3GameInstance>(GameInstance);
+						if (Week3GameInstance)
+						{
+							ScoreText->SetText(FText::FromString(FString::Printf(TEXT("Score: %d"), Week3GameInstance->TotalScore)));
+						}
+					}
+				}
+				//Level UI업데이트
+				if (UTextBlock* LevelIndexText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("Level"))))
+				{
+					if (UGameInstance* GameInstance = GetGameInstance())
+					{
+						UWeek3GameInstance* Week3GameInstance = Cast<UWeek3GameInstance>(GameInstance);
+						if (Week3GameInstance)
+						{
+							LevelIndexText->SetText(FText::FromString(FString::Printf(TEXT("Level: %d"), Week3GameInstance->CurrentLevelIndex)));
+						}
+					}
+				}
+				//Wave추가
+				if (UTextBlock* WaveIndexText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("Wave"))))
+				{
+					WaveIndexText->SetText(FText::FromString(FString::Printf(TEXT("Wave: %d"), CurrentWave)));
+				}
+			}
 		}
 	}
 }

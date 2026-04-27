@@ -61,4 +61,9 @@ public:
 	//드론(캐릭터)이 먹은 코인 변수
 
 	//스포너에서 SpawnWave 반환형 바꾸는거 고민중
+
+	void UpdateHUD();
+
+	//테스트용
+	FTimerHandle HUDUpdateTimerHandle;
 };

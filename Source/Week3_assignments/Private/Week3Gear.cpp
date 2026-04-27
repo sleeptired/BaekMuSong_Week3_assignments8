@@ -2,20 +2,21 @@
 
 
 #include "Week3Gear.h"
+#include "Components/BoxComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AWeek3Gear::AWeek3Gear()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
-	SetRootComponent(SceneRoot);
 
-	// Static Mesh Component를 생성하고 Scene Component에 Attach
-	StaticMeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
-	StaticMeshComp->SetupAttachment(SceneRoot);
+	RotationSpeed = FRotator(360.0f, 0.0f, 0.0f);
 
-	RotationSpeed = FRotator(90.0f, 0.0f, 0.0f);
+	CollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("Collision"));
+	CollisionBox->SetBoxExtent(FVector(100.0f, 100.0f, 20.0f));
+	CollisionBox->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
+	CollisionBox->SetupAttachment(SceneRoot);
 }
 
 // Called when the game starts or when spawned

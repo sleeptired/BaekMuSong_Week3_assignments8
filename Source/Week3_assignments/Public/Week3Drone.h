@@ -43,18 +43,18 @@ public:
 	FTimerHandle ReverseTimerHandle;
 
 	// 아이템에서 디버프를 걸 때 부르는 함수
-	//void ApplySlow(float Duration);
-	//void ClearSlow();
-	//
-	//void ApplyReverse(float Duration);
-	//void ClearReverse();
-	//
-	//// UI 남은 시간을 알려주는 함수
-	//UFUNCTION(BlueprintPure, Category = "Debuff")
-	//float GetSlowTimeRemaining() const;
-	//
-	//UFUNCTION(BlueprintPure, Category = "Debuff")
-	//float GetReverseTimeRemaining() const;
+	void ApplySlow(float Duration);
+	void ClearSlow();
+	
+	void ApplyReverse(float Duration);
+	void ClearReverse();
+	
+	// UI 남은 시간을 알려주는 함수
+	UFUNCTION(BlueprintPure, Category = "Debuff")
+	float GetSlowTimeRemaining() const;
+	
+	UFUNCTION(BlueprintPure, Category = "Debuff")
+	float GetReverseTimeRemaining() const;
 
 protected:
 	// Called when the game starts or when spawned

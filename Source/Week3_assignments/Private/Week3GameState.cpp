@@ -2,6 +2,7 @@
 
 
 #include "Week3GameState.h"
+#include "Week3Drone.h"
 #include "Week3GameInstance.h"
 #include "Week3PuzzleSpawner.h"
 #include "Week3DroneController.h"
@@ -16,6 +17,7 @@ AWeek3GameState::AWeek3GameState()
 	MaxWaves = 3; // 3웨이브
 	WaveDuration = 10.0f; 
 	WaveTimeRemaining = 0;
+	CurrentEventMessage = TEXT("");//EventText
 }
 
 void AWeek3GameState::BeginPlay()
@@ -48,7 +50,23 @@ void AWeek3GameState::StartWave()
 			Week3DroneController->ShowGameHUD();
 		}
 	}
-	//테스트용이라서 나중에 주석풀기
+
+	// 이벤트 UI 생성부분
+	int32 CurrentLevel = 1;
+	if (UWeek3GameInstance* GI = Cast<UWeek3GameInstance>(GetGameInstance()))
+	{
+		CurrentLevel = GI->CurrentLevelIndex;
+	}
+
+	// 현재 레벨과 웨이브에 맞는 문구를 가져옵니다.
+	CurrentEventMessage = GetWaveEventMessage(CurrentLevel, CurrentWave);
+
+	// 4초 뒤에 HideEventText 함수를 호출
+	GetWorldTimerManager().SetTimer(EventTextTimerHandle, this, &AWeek3GameState::HideEventText, 4.0f, false);
+	//
+
+
+	//테스트중이라서 나중에 주석풀기
 	//float BaseDuration = 60.0f;
 	//WaveDuration = BaseDuration - (CurrentWave - 1) * 15.0f;
 	//
@@ -206,6 +224,35 @@ void AWeek3GameState::OnGameOver()
 	}
 }
 
+void AWeek3GameState::HideEventText()
+{
+	CurrentEventMessage = TEXT("");
+}
+
+FString AWeek3GameState::GetWaveEventMessage(int32 LevelIndex, int32 WaveIndex)
+{
+	if (LevelIndex == 1)
+	{
+		if (WaveIndex == 1) return TEXT("Level 1 점수 배터리를 최대한 많이 획득하세요");
+		if (WaveIndex == 2) return TEXT("Spike가 나타났습니다! 조심하세요");
+		if (WaveIndex == 3) return TEXT("힐링 배터리가 추가 되었습니다. 체력을 회복하세요");
+	}
+	else if (LevelIndex == 2)
+	{
+		if (WaveIndex == 1) return TEXT("Level 2 회전하는 장애물이 나타납니다! 조심하세요");
+		if (WaveIndex == 2) return TEXT("이동속도 저하 아이템이 생성되니 조심하세요");
+		if (WaveIndex == 3) return TEXT("가시 함정이 다시 추가되었습니다! 조심하세요");
+	}
+	else if (LevelIndex == 3)
+	{
+		if (WaveIndex == 1) return TEXT("Level 3 조작을 반전시키는 위험한 아이템을 조심하세요");
+		if (WaveIndex == 2) return TEXT("범위 폭발 지뢰가 추가되었습니다! 조심하세요");
+		if (WaveIndex == 3) return TEXT("마지막 입니다! 끝까지 점수 배터리를 많이 획득하고 살아남으세요!");
+	}
+
+	return TEXT("");
+}
+
 void AWeek3GameState::UpdateHUD()
 {
 	if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
@@ -249,7 +296,57 @@ void AWeek3GameState::UpdateHUD()
 				{
 					WaveIndexText->SetText(FText::FromString(FString::Printf(TEXT("Wave: %d"), CurrentWave)));
 				}
+
+				//디버스 텍스처
+				if (AWeek3Drone* Drone = Cast<AWeek3Drone>(PlayerController->GetPawn()))
+				{
+					//  슬로우 텍스트 처리
+					if (UTextBlock* SlowText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("SlowTimeText"))))
+					{
+						float SlowTime = Drone->GetSlowTimeRemaining();
+						if (SlowTime > 0.0f) // 슬로우에 걸려있을 때
+						{
+							SlowText->SetVisibility(ESlateVisibility::Visible);
+							SlowText->SetText(FText::FromString(FString::Printf(TEXT("Slow! : %.1f s"), SlowTime)));
+						}
+						else 
+						{
+							SlowText->SetVisibility(ESlateVisibility::Hidden);
+						}
+					}
+
+					// 조작 반전 텍스트 처리
+					if (UTextBlock* ReverseText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("ReverseTimeText"))))
+					{
+						float ReverseTime = Drone->GetReverseTimeRemaining();
+						if (ReverseTime > 0.0f) // 조작 반전에 걸려있을 때
+						{
+							ReverseText->SetVisibility(ESlateVisibility::Visible);
+							ReverseText->SetText(FText::FromString(FString::Printf(TEXT("REVERSE! : %.1f s"), ReverseTime)));
+						}
+						else // 안 걸려있으면 숨김
+						{
+							ReverseText->SetVisibility(ESlateVisibility::Hidden);
+						}
+					}
+				}
+
+				//이벤트 텍스트 처리
+				if (UTextBlock* EventText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("EventText"))))
+				{
+					// CurrentEventMessage가 비어있다면
+					if (CurrentEventMessage.IsEmpty())
+					{
+						EventText->SetVisibility(ESlateVisibility::Hidden);
+					}
+					else
+					{
+						EventText->SetVisibility(ESlateVisibility::Visible);
+						EventText->SetText(FText::FromString(CurrentEventMessage));
+					}
+				}
 			}
+
 		}
 	}
 }

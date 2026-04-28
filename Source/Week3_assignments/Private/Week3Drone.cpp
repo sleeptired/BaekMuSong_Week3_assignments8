@@ -48,7 +48,7 @@ AWeek3Drone::AWeek3Drone()
 	MoveInput = FVector(0, 0, 0);
 	LookInput = FVector(0, 0, 0);
 
-	MoveSpeed = 1000.0f;
+	MoveSpeed = 1200.0f;
 	RotationSpeed = 100.0f;
 	bIsGrounded = false;
 
@@ -85,21 +85,46 @@ void AWeek3Drone::AddHealth(float Amount)
 	UpdateOverheadHP();
 	UE_LOG(LogTemp, Warning, TEXT("Health increased to: %f"), CurrentHealth);
 }
+//디버프 처리 함수 파트
+void AWeek3Drone::ApplySlow(float Duration)
+{
+	bIsSlowed = true;
 
-//void AWeek3Drone::ApplySlow(float Duration)
-//{
-//	bIsSlowed = true;
+	float RemainingTime = GetWorldTimerManager().GetTimerRemaining(SlowTimerHandle);
+	RemainingTime = (RemainingTime > 0.0f) ? RemainingTime + Duration : Duration;
+
+	GetWorldTimerManager().SetTimer(SlowTimerHandle, this, &AWeek3Drone::ClearSlow, RemainingTime, false);
+}
+
+void AWeek3Drone::ClearSlow()
+{
+	bIsSlowed = false;
+}
+
+void AWeek3Drone::ApplyReverse(float Duration)
+{
+	bIsReversed = true;
+	float RemainingTime = GetWorldTimerManager().GetTimerRemaining(ReverseTimerHandle);
+	RemainingTime = (RemainingTime > 0.0f) ? RemainingTime + Duration : Duration;
+
+	GetWorldTimerManager().SetTimer(ReverseTimerHandle, this, &AWeek3Drone::ClearReverse, RemainingTime, false);
+}
+
+void AWeek3Drone::ClearReverse()
+{
+	bIsReversed = false;
+}
+float AWeek3Drone::GetSlowTimeRemaining() const
+{
+	return GetWorldTimerManager().GetTimerRemaining(SlowTimerHandle);
+}
+
+float AWeek3Drone::GetReverseTimeRemaining() const
+{
+	return GetWorldTimerManager().GetTimerRemaining(ReverseTimerHandle);
+}
+
 //
-//	float RemainingTime = GetWorldTimerManager().GetTimerRemaining(SlowTimerHandle);
-//	RemainingTime = (RemainingTime > 0.0f) ? RemainingTime + Duration : Duration;
-//
-//	GetWorldTimerManager().SetTimer(SlowTimerHandle, this, &AWeek3Drone::ClearSlow, RemainingTime, false);
-//}
-//
-//void AWeek3Drone::ClearSlow()
-//{
-//	bIsSlowed = false;
-//}
 
 // Called when the game starts or when spawned
 void AWeek3Drone::BeginPlay()
@@ -332,25 +357,36 @@ void AWeek3Drone::UpdateMovement(float DeltaTime)
 	FVector LocalInput = MoveInput;
 	LocalInput.Z = 0.0f; // 이동 시 상하 입력 무시
 
+	if (bIsReversed)
+	{
+		LocalInput *= -1.0f;
+	}
+
+
 	if (!LocalInput.IsNearlyZero())
 	{
+		//슬로우 적용
+		float CurrentMoveSpeed = bIsSlowed ? (MoveSpeed * 0.5f) : MoveSpeed;
+
 		if (bIsGrounded)
 		{
-			// 지상 이동 (파고들기 방지)
+			// 지상 이동 
 			FVector WorldDir = GetActorRotation().RotateVector(LocalInput);
 			WorldDir.Z = 0.0f;
 
 			if (!WorldDir.IsNearlyZero())
 			{
 				WorldDir.Normalize();
-				FVector DeltaLocation = WorldDir * MoveSpeed * DeltaTime;
+				//FVector DeltaLocation = WorldDir * MoveSpeed * DeltaTime; 구버전
+				FVector DeltaLocation = WorldDir * CurrentMoveSpeed * DeltaTime;
 				AddActorWorldOffset(DeltaLocation, true);
 			}
 		}
 		else
 		{
 			// 공중 에어 컨트롤 (속도 40%)
-			float AirSpeed = MoveSpeed * 0.4f;
+			//float AirSpeed = MoveSpeed * 0.4f;
+			float AirSpeed = CurrentMoveSpeed * 0.4f; // 여기도 CurrentMoveSpeed 적용!
 			FVector DeltaLocation = LocalInput * AirSpeed * DeltaTime;
 			AddActorLocalOffset(DeltaLocation, true);
 		}

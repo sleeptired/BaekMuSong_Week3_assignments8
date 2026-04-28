@@ -37,6 +37,7 @@ public:
 	FTimerHandle WaveTimerHandle;
 	FTimerHandle UICountdownTimerHandle; // 1초마다 남은 시간 깎는 용도
 	FTimerHandle HUDUpdateTimerHandle;
+	FTimerHandle EventTextTimerHandle;
 
 	// 흐름 제어 함수들
 	void StartWave();
@@ -70,7 +71,13 @@ public:
 
 	//스포너에서 SpawnWave 반환형 바꾸는거 고민중
 
+	FString CurrentEventMessage;
 
+	// 이벤트 메시지를 지우는 함수
+	void HideEventText();
+
+	// 현재 레벨과 웨이브에 맞는 안내 문구를 반환하는 함수
+	FString GetWaveEventMessage(int32 LevelIndex, int32 WaveIndex);
 
 	void UpdateHUD();
 

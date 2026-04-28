@@ -101,7 +101,7 @@ void AWeek3GameState::EndWave()
 
 	if (CurrentWave > MaxWaves)
 	{
-		OnGameOver(true); // 레벨 클리어
+		EndLevel(); // 레벨 클리어
 	}
 	else
 	{
@@ -115,55 +115,93 @@ void AWeek3GameState::UpdateTimeRemaining()
 	WaveTimeRemaining--;
 }
 
-void AWeek3GameState::OnGameOver(bool bIsCleared)
-{
-	//여기 로직 수정하기
-	
-	//GameInstance확인
-	if (bIsCleared)
-	{
-		if (UWeek3GameInstance* GI = Cast<UWeek3GameInstance>(GetGameInstance()))
-		{
-			GI->AddToScore(Score);
-			GI->CurrentLevelIndex++;
+//void AWeek3GameState::OnGameOver(bool bIsCleared)
+//{
+//	//여기 로직 수정하기
+//	
+//	//GameInstance확인
+//	if (bIsCleared)
+//	{
+//		if (UWeek3GameInstance* GI = Cast<UWeek3GameInstance>(GetGameInstance()))
+//		{
+//			GI->AddToScore(Score);
+//			GI->CurrentLevelIndex++;
+//
+//			if (GI->CurrentLevelIndex > 3) // 3레벨까지 다 깼다면
+//			{
+//				if (AWeek3DroneController* PC = Cast<AWeek3DroneController>(GetWorld()->GetFirstPlayerController()))
+//				{
+//					//일단 테스트용(게임 종료부분)
+//					if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+//					{
+//						if (AWeek3DroneController* Week3DroneController = Cast<AWeek3DroneController>(PlayerController))
+//						{
+//							Week3DroneController->ShowMainMenu(true);
+//						}
+//					}
+//					//
+//				}
+//			}
+//			else
+//			{
+//				// 다음 맵 열기
+//				FString NextLevelName = FString::Printf(TEXT("Level_%d"), GI->CurrentLevelIndex);
+//				UGameplayStatics::OpenLevel(GetWorld(), FName(*NextLevelName));
+//			}
+//		}
+//	}
+//	else
+//	{
+//		// 사망 시: 메뉴 UI 띄우기
+//		if (AWeek3DroneController* PC = Cast<AWeek3DroneController>(GetWorld()->GetFirstPlayerController()))
+//		{
+//			//일단 테스트용(게임 종료부분)
+//			if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+//			{
+//				if (AWeek3DroneController* Week3DroneController = Cast<AWeek3DroneController>(PlayerController))
+//				{
+//					Week3DroneController->ShowMainMenu(true);
+//				}
+//			}
+//			//
+//		}
+//	}
+//}
 
-			if (GI->CurrentLevelIndex > 3) // 3레벨까지 다 깼다면
+void AWeek3GameState::EndLevel()
+{
+	if (UWeek3GameInstance* GI = Cast<UWeek3GameInstance>(GetGameInstance()))
+	{
+		GI->AddToScore(Score);
+		GI->CurrentLevelIndex++;
+
+		if (GI->CurrentLevelIndex > 3) // 3레벨까지 다 깼다면
+		{
+			if (AWeek3DroneController* Week3DroneController = Cast<AWeek3DroneController>(GetWorld()->GetFirstPlayerController()))
 			{
-				if (AWeek3DroneController* PC = Cast<AWeek3DroneController>(GetWorld()->GetFirstPlayerController()))
-				{
-					//일단 테스트용(게임 종료부분)
-					if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
-					{
-						if (AWeek3DroneController* Week3DroneController = Cast<AWeek3DroneController>(PlayerController))
-						{
-							Week3DroneController->ShowMainMenu(true);
-						}
-					}
-					//
-				}
-			}
-			else
-			{
-				// 다음 맵 열기
-				FString NextLevelName = FString::Printf(TEXT("Level_%d"), GI->CurrentLevelIndex);
-				UGameplayStatics::OpenLevel(GetWorld(), FName(*NextLevelName));
+				Week3DroneController->SetPause(true);
+				Week3DroneController->ShowMainMenu(true,true); //TimeOver
 			}
 		}
-	}
-	else
-	{
-		// 사망 시: 메뉴 UI 띄우기
-		if (AWeek3DroneController* PC = Cast<AWeek3DroneController>(GetWorld()->GetFirstPlayerController()))
+		else
 		{
-			//일단 테스트용(게임 종료부분)
-			if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
-			{
-				if (AWeek3DroneController* Week3DroneController = Cast<AWeek3DroneController>(PlayerController))
-				{
-					Week3DroneController->ShowMainMenu(true);
-				}
-			}
-			//
+			// 다음 맵 열기
+			FString NextLevelName = FString::Printf(TEXT("Level_%d"), GI->CurrentLevelIndex);
+			UGameplayStatics::OpenLevel(GetWorld(), FName(*NextLevelName));
+		}
+	}
+}
+
+void AWeek3GameState::OnGameOver()
+{
+	UE_LOG(LogTemp, Error, TEXT("Game Over! 플레이어가 파괴되었습니다."));
+
+	if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+	{
+		if (AWeek3DroneController* Week3DroneController = Cast<AWeek3DroneController>(PlayerController))
+		{
+			Week3DroneController->SetPause(true);     // 게임 멈춤
+			Week3DroneController->ShowMainMenu(true, false); // GameOver
 		}
 	}
 }

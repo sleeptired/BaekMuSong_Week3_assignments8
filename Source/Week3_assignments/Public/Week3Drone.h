@@ -11,6 +11,7 @@ class USkeletalMeshComponent;
 class UStaticMeshComponent;
 class USpringArmComponent;
 class UCameraComponent;
+class UWidgetComponent;
 struct FInputActionValue;
 
 UCLASS()
@@ -29,6 +30,31 @@ public:
 	// 체력을 회복시키는 함수
 	UFUNCTION(BlueprintCallable, Category = "HP")
 	void AddHealth(float Amount);
+
+	// 디버프 아이템용
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Debuff")
+	bool bIsSlowed;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Debuff")
+	bool bIsReversed;
+
+	// 디버프 해제를 위한 타이머 
+	FTimerHandle SlowTimerHandle;
+	FTimerHandle ReverseTimerHandle;
+
+	// 아이템에서 디버프를 걸 때 부르는 함수
+	//void ApplySlow(float Duration);
+	//void ClearSlow();
+	//
+	//void ApplyReverse(float Duration);
+	//void ClearReverse();
+	//
+	//// UI 남은 시간을 알려주는 함수
+	//UFUNCTION(BlueprintPure, Category = "Debuff")
+	//float GetSlowTimeRemaining() const;
+	//
+	//UFUNCTION(BlueprintPure, Category = "Debuff")
+	//float GetReverseTimeRemaining() const;
 
 protected:
 	// Called when the game starts or when spawned
@@ -49,6 +75,11 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UCameraComponent* CameraComp;
+
+	//3D위젯
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
+	UWidgetComponent* OverheadWidget;
+	 
 
 	FVector MoveInput;
 	FVector LookInput;
@@ -110,8 +141,9 @@ protected:
 	float CurrentHealth;
 
 	// 사망 처리 함수 (체력이 0 이하가 되었을 때 호출)
-	UFUNCTION(BlueprintCallable, Category = "HP")
 	void OnDeath();
+
+	void UpdateOverheadHP();
 
 	// 데미지 처리 함수 - 외부로부터 데미지를 받을 때 호출됨
     // 또는 AActor의 TakeDamage()를 오버라이드

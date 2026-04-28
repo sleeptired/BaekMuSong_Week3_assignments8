@@ -36,6 +36,7 @@ public:
 
 	FTimerHandle WaveTimerHandle;
 	FTimerHandle UICountdownTimerHandle; // 1초마다 남은 시간 깎는 용도
+	FTimerHandle HUDUpdateTimerHandle;
 
 	// 흐름 제어 함수들
 	void StartWave();
@@ -52,8 +53,15 @@ public:
 	void Add_Score(int32 Amount);
 
 
+	//UFUNCTION(BlueprintCallable, Category = "Level")
+	//void OnGameOver(bool bIsCleared);
+
+
 	UFUNCTION(BlueprintCallable, Category = "Level")
-	void OnGameOver(bool bIsCleared);
+	void EndLevel(); // 웨이브 3 클리어 시 
+
+	UFUNCTION(BlueprintCallable, Category = "Level")
+	void OnGameOver(); // 드론 사망 시 
 
 
 	//점수 아이템을 다 먹으면 넘어갈 수 있게 적용 생각중
@@ -62,8 +70,8 @@ public:
 
 	//스포너에서 SpawnWave 반환형 바꾸는거 고민중
 
+
+
 	void UpdateHUD();
 
-	//테스트용
-	FTimerHandle HUDUpdateTimerHandle;
 };

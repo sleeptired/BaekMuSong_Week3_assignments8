@@ -51,10 +51,16 @@ public:
 	void ShowGameHUD();
 
 	UFUNCTION(BlueprintCallable, Category = "Menu")
-	void ShowMainMenu(bool bIsRestart); //bool값은 Start인지 Restart인지 텍스트차이용
+	void ShowMainMenu(bool bIsRestart, bool bIsTimeOver); //bool값은 Start인지 Restart인지 텍스트차이용
 
 	UFUNCTION(BlueprintCallable, Category = "Menu")
 	void StartGame();
 
+	UFUNCTION(BlueprintCallable, Category = "Menu")
+	void OnExitButtonClicked();
+
 	virtual void BeginPlay() override;
+
+private: 
+	void UpdateMainMenuUI(bool bIsRestart, bool bIsTimeOver);
 };

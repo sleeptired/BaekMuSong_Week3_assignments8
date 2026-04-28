@@ -4,11 +4,14 @@
 #include "Week3Drone.h"
 #include "Components/SphereComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Components/WidgetComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputComponent.h"
 #include "Week3DroneController.h"
+#include "Components/TextBlock.h"
+#include "Week3GameState.h"
 #include "DrawDebugHelpers.h"
 
 // Sets default values
@@ -38,6 +41,10 @@ AWeek3Drone::AWeek3Drone()
 	CameraComp->SetupAttachment(SpringArmComp, USpringArmComponent::SocketName); 
 	CameraComp->bUsePawnControlRotation = false;
 
+	OverheadWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("OverheadWidget"));
+	OverheadWidget->SetupAttachment(StaticMeshComp);
+	OverheadWidget->SetWidgetSpace(EWidgetSpace::Screen);
+
 	MoveInput = FVector(0, 0, 0);
 	LookInput = FVector(0, 0, 0);
 
@@ -61,6 +68,10 @@ AWeek3Drone::AWeek3Drone()
 
 	//무적판정
 	bIsInvincible = false;
+
+	//디버프 판정
+	bIsSlowed = false;
+	bIsReversed = false;
 }
 
 float AWeek3Drone::GetHealth() const
@@ -71,19 +82,59 @@ float AWeek3Drone::GetHealth() const
 void AWeek3Drone::AddHealth(float Amount)
 {
 	CurrentHealth = FMath::Clamp(CurrentHealth + Amount, 0.0f, MaxHealth);
+	UpdateOverheadHP();
 	UE_LOG(LogTemp, Warning, TEXT("Health increased to: %f"), CurrentHealth);
 }
+
+//void AWeek3Drone::ApplySlow(float Duration)
+//{
+//	bIsSlowed = true;
+//
+//	float RemainingTime = GetWorldTimerManager().GetTimerRemaining(SlowTimerHandle);
+//	RemainingTime = (RemainingTime > 0.0f) ? RemainingTime + Duration : Duration;
+//
+//	GetWorldTimerManager().SetTimer(SlowTimerHandle, this, &AWeek3Drone::ClearSlow, RemainingTime, false);
+//}
+//
+//void AWeek3Drone::ClearSlow()
+//{
+//	bIsSlowed = false;
+//}
 
 // Called when the game starts or when spawned
 void AWeek3Drone::BeginPlay()
 {
 	Super::BeginPlay();
+	UpdateOverheadHP();
 }
 
 
 void AWeek3Drone::OnDeath()
 {
+	AWeek3GameState* Week3GameState = GetWorld() ? GetWorld()->GetGameState<AWeek3GameState>() : nullptr;
+	if (Week3GameState)
+	{
+		Week3GameState->OnGameOver();
+	}
+}
 
+void AWeek3Drone::UpdateOverheadHP()
+{
+	if (!OverheadWidget)
+	{
+		return;
+	}
+
+	UUserWidget* OverheadWidgetInstance = OverheadWidget->GetUserWidgetObject();
+	if (!OverheadWidgetInstance)
+	{
+		return;
+	}
+
+	if (UTextBlock* HPText = Cast<UTextBlock>(OverheadWidgetInstance->GetWidgetFromName(TEXT("OverHeadHP"))))
+	{
+		HPText->SetText(FText::FromString(FString::Printf(TEXT("%.0f / %.0f"), CurrentHealth, MaxHealth)));
+	}
 }
 
 float AWeek3Drone::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -97,6 +148,8 @@ float AWeek3Drone::TakeDamage(float DamageAmount, FDamageEvent const& DamageEven
 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser); //실제 데미지를 들고온다.
 
 	CurrentHealth = FMath::Clamp(CurrentHealth - DamageAmount, 0.0f, MaxHealth);
+
+	UpdateOverheadHP();
 
 	UE_LOG(LogTemp, Warning, TEXT("Health Decreased to: %f"), CurrentHealth);
 

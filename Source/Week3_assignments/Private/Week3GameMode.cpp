@@ -12,3 +12,18 @@ AWeek3GameMode::AWeek3GameMode()
 	PlayerControllerClass = AWeek3DroneController::StaticClass();
 	GameStateClass = AWeek3GameState::StaticClass();
 }
+
+UClass* AWeek3GameMode::GetDefaultPawnClassForController_Implementation(AController* InController)
+{
+	if (GetWorld())
+	{
+		FString CurrentMapName = GetWorld()->GetMapName();
+
+		if (CurrentMapName.Contains("MainMenu_Level"))
+		{
+			return nullptr;
+		}
+	}
+
+	return Super::GetDefaultPawnClassForController_Implementation(InController);
+}

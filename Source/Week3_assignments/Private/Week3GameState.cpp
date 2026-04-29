@@ -74,7 +74,7 @@ void AWeek3GameState::StartWave()
 	{
 		WaveDuration = 15.0f;
 	}
-
+	
 	WaveTimeRemaining = (int32)WaveDuration;
 
 	// 스포너에게 스폰 명령 (웨이브 증가에 따른 개수 증가는 스포너가 알아서 처리함)

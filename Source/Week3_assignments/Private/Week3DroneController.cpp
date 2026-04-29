@@ -83,46 +83,6 @@ void AWeek3DroneController::ShowMainMenu(bool bIsRestart, bool bIsTimeOver = fal
 
 			UpdateMainMenuUI(bIsRestart, bIsTimeOver);
 		}
-		//(구)게임버튼 텍스트 정하는곳
-		//if (UTextBlock* ButtonText = Cast<UTextBlock>(MainMenuWidgetInstance->GetWidgetFromName(TEXT("StartButtonText"))))
-		//{
-		//	if (bIsRestart)
-		//	{
-		//		//GameOver로직
-		//		ButtonText->SetText(FText::FromString("Restart"));
-		//
-		//	}
-		//	else
-		//	{
-		//
-		//		ButtonText->SetText(FText::FromString("Start"));
-		//	}
-		//}
-		//
-		////게임오버 텍스트 애니메이션
-		//if(bIsRestart)
-		//{
-		//	//게임오버 텍스트 애니메이션
-		//	UFunction* PlayAnimFunc = MainMenuWidgetInstance->FindFunction(FName("PlayGameOverAnim"));
-		//	if (PlayAnimFunc)
-		//	{
-		//		MainMenuWidgetInstance->ProcessEvent(PlayAnimFunc, nullptr);
-		//	}
-		//	//Total스코어 텍스트
-		//	if (UTextBlock* TotalScoreText = Cast<UTextBlock>(MainMenuWidgetInstance->GetWidgetFromName("TotalScore")))
-		//	{
-		//		if (UWeek3GameInstance* Week3GameInstance = Cast<UWeek3GameInstance>(UGameplayStatics::GetGameInstance(this)))
-		//		{
-		//			TotalScoreText->SetText(FText::FromString(
-		//				FString::Printf(TEXT("Total Score: %d"), Week3GameInstance->TotalScore)
-		//			));
-		//		}
-		//	}
-		//}
-		//else//게임제목 이런 텍스트 나오는 곳
-		//{
-		//
-		//}
 	}
 }
 
@@ -174,25 +134,6 @@ void AWeek3DroneController::BeginPlay()
 		ShowMainMenu(false);
 	}
 
-	//삭제
-	//if (HUDWidgetClass)
-	//{
-	//	HUDWidgetInstance = CreateWidget<UUserWidget>(this, HUDWidgetClass);
-	//	if (HUDWidgetInstance)
-	//	{
-	//		HUDWidgetInstance->AddToViewport();
-	//	}
-	//}
-	//
-
-
-	//삭제
-	//AWeek3GameState* Week3GameState = GetWorld() ? GetWorld()->GetGameState<AWeek3GameState>() : nullptr;
-	//if (Week3GameState)
-	//{
-	//	Week3GameState->UpdateHUD();
-	//}
-	//
 }
 
 void AWeek3DroneController::UpdateMainMenuUI(bool bIsRestart, bool bIsTimeOver)

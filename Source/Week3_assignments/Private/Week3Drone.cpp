@@ -83,7 +83,7 @@ void AWeek3Drone::AddHealth(float Amount)
 {
 	CurrentHealth = FMath::Clamp(CurrentHealth + Amount, 0.0f, MaxHealth);
 	UpdateOverheadHP();
-	UE_LOG(LogTemp, Warning, TEXT("Health increased to: %f"), CurrentHealth);
+	//UE_LOG(LogTemp, Warning, TEXT("Health increased to: %f"), CurrentHealth);
 }
 //디버프 처리 함수 파트
 void AWeek3Drone::ApplySlow(float Duration)
@@ -221,7 +221,6 @@ void AWeek3Drone::CustomTick(float FixedDeltaTime)
 	UpdateGroundDetection();                      // 2. 지면 감지
 	UpdateGravityAndHovering(FixedDeltaTime);     // 3. 중력 및 호버링
 	UpdateMovement(FixedDeltaTime);               // 4. 전후좌우 이동 업데이트
-	//UpdateBanking(FixedDeltaTime); 모션 업데이트 나중에 추가예정
 
 	LookInput.X = 0.0f;
 	LookInput.Y = 0.0f;
@@ -310,13 +309,13 @@ void AWeek3Drone::UpdateGroundDetection()
 	bIsGrounded = GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECC_Visibility, TraceParams);
 
 	// 디버그 드로잉
-	FColor LineColor = bIsGrounded ? FColor::Green : FColor::Red;
-	DrawDebugLine(GetWorld(), StartLocation, EndLocation, LineColor, false, -1.0f, 0, 2.0f);
-
-	if (bIsGrounded)
-	{
-		DrawDebugPoint(GetWorld(), HitResult.ImpactPoint, 10.0f, FColor::Yellow, false, -1.0f);
-	}
+	//FColor LineColor = bIsGrounded ? FColor::Green : FColor::Red;
+	//DrawDebugLine(GetWorld(), StartLocation, EndLocation, LineColor, false, -1.0f, 0, 2.0f);
+	//
+	//if (bIsGrounded)
+	//{
+	//	DrawDebugPoint(GetWorld(), HitResult.ImpactPoint, 10.0f, FColor::Yellow, false, -1.0f);
+	//}
 }
 
 void AWeek3Drone::UpdateGravityAndHovering(float DeltaTime)

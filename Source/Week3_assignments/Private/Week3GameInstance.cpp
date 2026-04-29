@@ -12,5 +12,5 @@ UWeek3GameInstance::UWeek3GameInstance()
 void UWeek3GameInstance::AddToScore(int32 Amount)
 {
 	TotalScore += Amount;
-	UE_LOG(LogTemp, Warning, TEXT("총 누적 점수 갱신: %d"), TotalScore);
+	//UE_LOG(LogTemp, Warning, TEXT("총 누적 점수 갱신: %d"), TotalScore);
 }

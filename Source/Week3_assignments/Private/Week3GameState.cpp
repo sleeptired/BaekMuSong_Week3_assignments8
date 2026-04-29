@@ -15,7 +15,7 @@ AWeek3GameState::AWeek3GameState()
 	Score = 0;
 	CurrentWave = 1;
 	MaxWaves = 3; // 3웨이브
-	WaveDuration = 10.0f; 
+	WaveDuration = 60.0f; 
 	WaveTimeRemaining = 0;
 	CurrentEventMessage = TEXT("");//EventText
 }
@@ -67,13 +67,13 @@ void AWeek3GameState::StartWave()
 
 
 	//테스트중이라서 나중에 주석풀기
-	//float BaseDuration = 60.0f;
-	//WaveDuration = BaseDuration - (CurrentWave - 1) * 15.0f;
-	//
-	//if (WaveDuration < 15.0f)
-	//{
-	//	WaveDuration = 15.0f;
-	//}
+	float BaseDuration = 60.0f;
+	WaveDuration = BaseDuration - (CurrentWave - 1) * 15.0f;
+	
+	if (WaveDuration < 15.0f)
+	{
+		WaveDuration = 15.0f;
+	}
 
 	WaveTimeRemaining = (int32)WaveDuration;
 
@@ -91,7 +91,7 @@ void AWeek3GameState::StartWave()
 	GetWorldTimerManager().SetTimer(WaveTimerHandle, this, &AWeek3GameState::OnWaveTimeUp, WaveDuration, false);
 	GetWorldTimerManager().SetTimer(UICountdownTimerHandle, this, &AWeek3GameState::UpdateTimeRemaining, 1.0f, true);
 
-	UE_LOG(LogTemp, Warning, TEXT("Wave %d 시작!"), CurrentWave);
+	//UE_LOG(LogTemp, Warning, TEXT("Wave %d 시작!"), CurrentWave);
 }
 
 void AWeek3GameState::OnWaveTimeUp()
@@ -133,58 +133,6 @@ void AWeek3GameState::UpdateTimeRemaining()
 	WaveTimeRemaining--;
 }
 
-//void AWeek3GameState::OnGameOver(bool bIsCleared)
-//{
-//	//여기 로직 수정하기
-//	
-//	//GameInstance확인
-//	if (bIsCleared)
-//	{
-//		if (UWeek3GameInstance* GI = Cast<UWeek3GameInstance>(GetGameInstance()))
-//		{
-//			GI->AddToScore(Score);
-//			GI->CurrentLevelIndex++;
-//
-//			if (GI->CurrentLevelIndex > 3) // 3레벨까지 다 깼다면
-//			{
-//				if (AWeek3DroneController* PC = Cast<AWeek3DroneController>(GetWorld()->GetFirstPlayerController()))
-//				{
-//					//일단 테스트용(게임 종료부분)
-//					if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
-//					{
-//						if (AWeek3DroneController* Week3DroneController = Cast<AWeek3DroneController>(PlayerController))
-//						{
-//							Week3DroneController->ShowMainMenu(true);
-//						}
-//					}
-//					//
-//				}
-//			}
-//			else
-//			{
-//				// 다음 맵 열기
-//				FString NextLevelName = FString::Printf(TEXT("Level_%d"), GI->CurrentLevelIndex);
-//				UGameplayStatics::OpenLevel(GetWorld(), FName(*NextLevelName));
-//			}
-//		}
-//	}
-//	else
-//	{
-//		// 사망 시: 메뉴 UI 띄우기
-//		if (AWeek3DroneController* PC = Cast<AWeek3DroneController>(GetWorld()->GetFirstPlayerController()))
-//		{
-//			//일단 테스트용(게임 종료부분)
-//			if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
-//			{
-//				if (AWeek3DroneController* Week3DroneController = Cast<AWeek3DroneController>(PlayerController))
-//				{
-//					Week3DroneController->ShowMainMenu(true);
-//				}
-//			}
-//			//
-//		}
-//	}
-//}
 
 void AWeek3GameState::EndLevel()
 {

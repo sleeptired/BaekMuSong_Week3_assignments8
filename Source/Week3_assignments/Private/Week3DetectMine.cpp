@@ -4,37 +4,29 @@
 #include "Week3DetectMine.h"
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "TimerManager.h"
 
 // Sets default values
 AWeek3DetectMine::AWeek3DetectMine()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = false;
-
-	SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
-	SetRootComponent(SceneRoot);
-
-	MineMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MineMesh"));
-	MineMesh->SetupAttachment(SceneRoot);
-
-	TriggerSphere = CreateDefaultSubobject<USphereComponent>(TEXT("TriggerSphere"));
+	// 1. 단일 충돌체 설정
+	TriggerSphere = CreateDefaultSubobject<USphereComponent>(TEXT("ExplosionSphere"));
 	TriggerSphere->SetupAttachment(SceneRoot);
-
-	bIsTriggered = false;
-
-	// 생성 시 기본 크기 세팅
 	TriggerSphere->InitSphereRadius(Settings.ExplosionRadius);
-	TriggerSphere->SetCollisionProfileName(TEXT("Trigger"));
+	TriggerSphere->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
 
+	// 2. 장판 인디케이터 설정
+	RangeIndicator = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RangeIndicator"));
+	RangeIndicator->SetupAttachment(SceneRoot);
+	RangeIndicator->SetCollisionEnabled(ECollisionEnabled::NoCollision); // 장판은 충돌하면 안 됨
+	RangeIndicator->SetVisibility(false);
 }
 
 void AWeek3DetectMine::SetTrapSettings(const FMineTrapSettings& NewSettings)
 {
 	Settings = NewSettings;
 
-	// 스포너가 던져준 랜덤 범위(Radius)에 맞춰서, 
-	// 실제 눈에 안 보이는 파란색 충돌 구체의 크기도 같이 갱신해 줍니다!
 	if (TriggerSphere)
 	{
 		TriggerSphere->SetSphereRadius(Settings.ExplosionRadius);
@@ -46,39 +38,59 @@ void AWeek3DetectMine::BeginPlay()
 {
 	Super::BeginPlay();
 
-	TriggerSphere->OnComponentBeginOverlap.AddDynamic(this, &AWeek3DetectMine::OnOverlapBegin);
+	if (RangeIndicator)
+	{
+		float Scale = Settings.ExplosionRadius / 50.0f;
+		RangeIndicator->SetWorldScale3D(FVector(Scale, Scale, Scale)); 
+	}
 }
 
-void AWeek3DetectMine::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void AWeek3DetectMine::OnTrapTriggered(AActor* Target)
 {
-	if (!bIsTriggered && OtherActor && OtherActor != this)
+	if (!Settings.bIsTriggered)
 	{
-		bIsTriggered = true;
+		Settings.bIsTriggered = true;
+		//UE_LOG(LogTemp, Warning, TEXT("지뢰 작동! %f초 뒤 폭발합니다!"), Settings.ExplosionDelay);
 
-		// Settings 안에 있는 값을 꺼내 씁니다.
-		UE_LOG(LogTemp, Warning, TEXT("[지뢰 작동] 범위 내 침입 감지! %f초 뒤 폭발!"), Settings.ExplosionDelay);
+		// 빨간색 장판 켜기
+		if (RangeIndicator)
+		{
+			//UE_LOG(LogTemp, Warning, TEXT("범위 작동 테스트"));
+			RangeIndicator->SetVisibility(true);
+		}
 
+		// 타이머 시작
 		GetWorld()->GetTimerManager().SetTimer(ExplosionTimerHandle, this, &AWeek3DetectMine::Explode, Settings.ExplosionDelay, false);
 	}
 }
 
+
 void AWeek3DetectMine::Explode()
 {
-	UE_LOG(LogTemp, Error, TEXT("지뢰 폭발 완료!"));
+	// 폭발 범위 안의 '모든' 플레이어에게 데미지
+	TArray<AActor*> OverlappingActors;
+	TriggerSphere->GetOverlappingActors(OverlappingActors);
 
+	for (AActor* Actor : OverlappingActors)
+	{
+		if (Actor && Actor->ActorHasTag("Player"))
+		{
+			// 부모 클래스에 있는 TrapDamage 변수를 활용
+			UGameplayStatics::ApplyDamage(Actor, TrapDamage, nullptr, this, UDamageType::StaticClass());
+		}
+	}
 
-	Destroy();
+	//UE_LOG(LogTemp, Error, TEXT("쾅! 지뢰 폭발 완료!"));
+
+	// 파티클이나 사운드를 넣고 싶다면 이 위치에서 재생하시면 됩니다.
+
+	Destroy(); // 지뢰 파괴
 }
 
-// Called every frame
-void AWeek3DetectMine::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
 
 FMineTrapSettings::FMineTrapSettings()
 {
 	ExplosionDelay = 3.0f;
-	ExplosionRadius = 300.0f;
+	ExplosionRadius = 600.0f;
+	bIsTriggered = false;
 }

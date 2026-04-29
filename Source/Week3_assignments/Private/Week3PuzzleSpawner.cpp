@@ -5,6 +5,7 @@
 #include "Components/BoxComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Week3MovePlatform.h" //장애물 변경
+#include "Week3MovingSpike.h"
 #include "Week3Gear.h"
 #include "SpawnObjectRow.h"
 
@@ -46,9 +47,9 @@ FVector AWeek3PuzzleSpawner::GetRandomSpawnLocation() const
 void AWeek3PuzzleSpawner::ApplyRandomSettings(AActor* SpawnedActor)
 {
 	//장애물 변경
-	if (AWeek3MovePlatform* MovingPlatform = Cast<AWeek3MovePlatform>(SpawnedActor))
+	if (AWeek3MovingSpike* MovingSpike = Cast<AWeek3MovingSpike>(SpawnedActor))
 	{
-		FMovePlatformSettings RandomSettings;
+		FMovingSpikeSettings RandomSettings;
 		RandomSettings.MoveSpeed = FMath::RandRange(100.0f, 800.0f);
 		RandomSettings.MaxRange = FMath::RandRange(500.0f, 1500.0f);
 		RandomSettings.MoveDirection = FVector(
@@ -56,7 +57,7 @@ void AWeek3PuzzleSpawner::ApplyRandomSettings(AActor* SpawnedActor)
 			FMath::RandRange(-1.0f, 1.0f),
 			FMath::RandRange(-1.0f, 1.0f)
 		);
-		MovingPlatform->SetPlatformSettings(RandomSettings);
+		MovingSpike->SetPlatformSettings(RandomSettings);
 	}
 	else if (AWeek3Gear* Gear = Cast<AWeek3Gear>(SpawnedActor))
 	{

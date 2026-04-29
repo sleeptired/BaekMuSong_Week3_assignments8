@@ -16,7 +16,7 @@ void AWeek3ReverseControlItem::ActivateItem(AActor* Activator)
 	{
 		Drone->ApplyReverse(ReverseDuration);
 
-		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, FString::Printf(TEXT("디버프: %f초간 컨트롤 반전"), ReverseDuration));
+		//GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, FString::Printf(TEXT("디버프: %f초간 컨트롤 반전"), ReverseDuration));
 		DestroyItem();
 	}
 }

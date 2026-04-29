@@ -18,7 +18,7 @@ void AWeek3SlowingItem::ActivateItem(AActor* Activator)
 		Drone->ApplySlow(SlowDuration);
 
 		// 화면에 알림 표시
-		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, TEXT("디버프: 5초간 이동 속도 50% 감소!"));
+		//GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, TEXT("디버프: 5초간 이동 속도 50% 감소!"));
 		DestroyItem();
 	}
 }
